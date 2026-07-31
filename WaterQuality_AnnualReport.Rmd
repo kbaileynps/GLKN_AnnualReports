@@ -1,0 +1,71 @@
+---
+title: "Water Quality Annual Report - `r params$park`: `r format(Sys.Date(), '%Y')`"
+output: html_document
+
+params:
+  park: "APIS" # default
+  park_full: "Apostle Islands National Lakeshore" # default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, message=FALSE, warning=FALSE}
+# Libraries 
+library(readr) # tidyverse data import
+library(dplyr) # data wrangling
+library(ggplot2) # plotting
+library(knitr) # for kable
+library(kableExtra) # custom kable features  
+```
+
+```{r data, include=FALSE}
+# loading data
+df <- read_csv("./data/wqp_glkn.csv")
+
+# selecting park 
+df_park <- df[df$park == params$park, ]
+```
+
+```{r source, include=FALSE}
+source(WaterQuality_AnnualReport_compile.R)
+```
+
+
+## {.tabset}
+
+### Overiew 
+
+#### Background
+
+#### Methods
+
+### Location
+
+#### Map
+
+### Time Series 
+
+```{r timeseries_plot}
+plot_timeseries(df_park)
+```
+
+### Profile Plots 
+
+```{r profile_plot}
+plot_dpethprofile(df_park)
+```
+
+### Boxplot
+
+```{r box_plot}
+plot_boxplot(df_park)
+```
+
+### Correlation Plot 
+
+```{r correlation_plot}
+plot_correlation(df_park)
+```
+
