@@ -1,71 +1,144 @@
 ---
-title: "Water Quality Annual Report - `r params$park`: `r format(Sys.Date(), '%Y')`"
+title: "Water Quality Monitoring for `r params$park_full`: `r format(Sys.Date(), '%Y')` Data Report"
+author: "Alex Egan, Richard Damstra, Cyrus Hester, and David VenderMeulen"
 output: html_document
 
 params:
-  park: "APIS" # default
-  park_full: "Apostle Islands National Lakeshore" # default
+  park: "ISRO" # default
+  park_full: "Isle Royale National Park" # default
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, 
+                      message = FALSE, 
+                      warning = FALSE)
 ```
 
-```{r libraries, message=FALSE, warning=FALSE}
-# Libraries 
-library(readr) # tidyverse data import
-library(dplyr) # data wrangling
-library(ggplot2) # plotting
-library(knitr) # for kable
-library(kableExtra) # custom kable features  
+```{r source, include=FALSE}
+source("WaterQuality_AnnualReport_compile.R")
 ```
 
 ```{r data, include=FALSE}
 # loading data
-df <- read_csv("./data/wqp_glkn.csv")
+df <- wqp_data |> 
+  dplyr::filter(Park == params$park)
 
-# selecting park 
-df_park <- df[df$park == params$park, ]
+# getting site names 
+sites <- df |> 
+  distinct(MonitoringLocationName) |> 
+  arrange(MonitoringLocationName) |> 
+  pull() 
+
+# selecting params
+type <- park_type[params$park]
+
+if(type == "lake"){
+  selected_params <- lake_param
+} else{
+  selected_params <- river_param
+}
 ```
 
-```{r source, include=FALSE}
-source(WaterQuality_AnnualReport_compile.R)
+## Overview {.tabset}
+
+In assistance with `r params$park` staff, the Great Lakes Inventory and Monitoring Network (GLKN) monitored water quality on the `r paste(sites, collapse = ", ")` `r park_type[params$park]` at `r params$park` for `r format(Sys.Date(), "%Y")`. This report contains figures and tables where `r format(Sys.Date(), "%Y")` data is compared to data from prior years for select parameters. The following water quality parameters are included in this report: 
+
+`r paste("-", selected_params, collapse = "\n")`
+
+A complete list of parameters monitored at `r params$park` is shown below, and current status and trends for all those parameters are available in GLKN's water quality visualizer, found here: 
+[GLKN Water Quality Visualizer](kinziebailey.shinyapps.io/GLKNViz-Dev/)
+
+<h1>Map of `r params$park`</h1>
+```{r map}
+map_data <- prep_map(df)
+
+plot_map(map_data)
 ```
 
+### Methods
 
-## {.tabset}
+GLKN employs widely accepted, practical, and effective methods conducted by trained aquatic ecologists to monitor the health and conditions of park waters. A detailed explanation of those methods can be found in the protocols liked here: 
 
-### Overiew 
+[NPS Datastore - Water quality monitoring protocol for inland lakes: Great Lakes Inventory and Monitoring Network, version 1.2](https://irma.nps.gov/DataStore/Reference/Profile/2290010)
 
-#### Background
+[NPS Datastore - Large rivers water quality monitoring protocol: Great Lakes Inventory and Monitoring Network, version 1.1](https://irma.nps.gov/DataStore/Reference/Profile/2230812)
 
-#### Methods
+The reference thresholds presented in this report are set by the state water quality agencie where the respective park is located and are independent of the work by GLKN. Thresholds are presented here for informational purposes only. 
 
-### Location
+<h1>Sampling Location</h1>
 
-#### Map
+As of August 2026, GLKN is actively monitoring water quality at 30 inland lake and 8 river sites across five national parks. Inland lakes are monitored at Apostle Islands (APIS), Pictured Rocks (PIRO), and Sleeping Bear Dunes (SLBE) national lakeshores and Isle Royale (ISRO) and Voyageurs (VOYA) national parks. The river sites are located at St. Croix National Scenic Riverway (SACN). Since the onset of monitoring in 2006, GLKN has added monitoring at some sites and suspended monitoring at others, and suspended monitoring altogether at Mississippi National River and Recreation Area (MISS) and Indiana Dunes National Park (INDU) due to duplication of effort with other agencies or other factors. 
 
-### Time Series 
+All changes in monitoring are fully described in our water quality monitoring protocols. GLKN has also monitored water quality at additional sites as part of shorter-term projects or opportunistically when staff time and funding are available. Only sites that are actively monitored are included in this report.
 
-```{r timeseries_plot}
-plot_timeseries(df_park)
-```
+<h1>Sampling Frequency</h1>
 
-### Profile Plots 
+GLKN began monitoring water quality in 2006 and monitoring is ongoing. At inland lakes water quality is monitored three times in the summer, generally in June, July, and August, with a few parks monitoring in May or September. For our river sites we monitor each site monthly during ice-free conditions, April – November. Over nearly 20 years of monitoring some data gaps in data are present, mostly due to missed sampling because of extenuating circumstances, such as bad weather or federal government shutdowns. Some parameters are monitored more frequently than others, as outlined below.  
 
-```{r profile_plot}
-plot_dpethprofile(df_park)
-```
+<h1>Parameters</h1>
 
-### Boxplot
+As of August 2026, GLKN monitors the 21 water quality parameters listed below. GLKN measures a core set of 6 parameters during every lake (three times/year) and river (~eight times/year) site visit.  We also measure an advanced set of parameters (8-21, below) less frequently (lakes once/year; rivers three time/year), which provide data for a more thorough understanding of changes in lakes and rivers over time. Two notable exceptions are that we suspended monitoring cations (Ca, Mg, Na, K) at most inland lakes ~2013-2018 due to financial constraints and ~2013 we increased monitoring dissolved organic carbon to three times/year at most lakes. 
 
-```{r box_plot}
-plot_boxplot(df_park)
-```
+1. Water temperature 
+2. Dissolved oxygen concentration (DO concentration mg/L) 
+3. Dissolved oxygen saturation (DO saturation %) 
+4. Specific conductance 
+5. pH 
+6. Water level (lakes only; for rivers flow is measured and reported by USGS, separately)  
+7. Water clarity (lakes - Secchi depth, rivers – total suspended solids) 
+8. Total Nitrogen  
+9. Nitrate 
+10. Ammonium 
+11. Total Phosphorus  
+12. Chlorophyll-a 
+13. Dissolved organic carbon 
+14. Alkalinity 
+15. Chloride 
+16. Sulfate 
+17. Dissolved silica 
+18. Calcium 
+19. Magnesium 
+20. Sodium 
+21. Potassium 
 
-### Correlation Plot 
+<h1>Data Quality</h1>
 
-```{r correlation_plot}
-plot_correlation(df_park)
+The overall objective of quality assurance/quality control (QA/QC) is to ensure that the data generated by a project are meaningful, representative, complete, precise, comparable, scientifically defensible, and reasonably free from bias. As such, GLKN water quality monitoring QA/QC procedures are extensive, beginning with field preparations, through the collection of data, to the final analysis and reporting of results. Each of our water quality monitoring protocols has a unique standard operating procedure that describes all aspects of GLKN’s water quality QA/QC. These procedures can be found here: 
+
+[Standard Operating Procedure #12](https://irma.nps.gov/DataStore/Reference/Profile/2288531) 
+
+[Standard Operating Procedures for Large Rivers Water Quality Monitoring](https://irma.nps.gov/DataStore/DownloadFile/604654)
+
+The analytical laboratories the samples are sent to also have their own QA/QC procedures and are required to generate reports that accompany all results. Data not meeting laboratory QA/QC requirements are flagged and censored.  
+
+As part of our annual data submission process, NPS Water Resources Division staff check our data to ensure it is formatted properly, does not contain grammatical errors, and compares it against prior submissions to document any edits to historical data.  
+
+This report adds an additional step to GLKN’s overall QAQC process as it helps facilitate internal review and analysis.  One important QAQC item to note for this report: Values reported by analytical laboratories that fall under the category of “< lower quantification limit” (also referred to as “below reporting limit” or “below method reporting limit”) are included as data points in the figures. We are confident that these values are close approximations to actual values. However, they should be treated with caution, particularly when doing rigorous statistical analyses. Values reported as “not detected” or “< detection limit” by laboratories are not included as data points on figures in this report but the total number of data points meeting that condition is shown above the figures. 
+
+### Site Summaries {.tabset}
+
+```{r site-tabs, results='asis'}
+for(site in sites){
+  
+  # Create tab for site
+  cat("#### ", site, "\n\n")
+  
+  # subsetting site data 
+  site_data <- df |> 
+    dplyr::filter(MonitoringLocationName == site)
+  
+  # Boxplots ----
+  boxplot_data <- prep_boxplot(df = site_data,
+                               park_code = params$park,
+                               type = park_type)
+  
+  bp <- plot_boxplot(df = boxplot_data)
+  
+  print(bp)
+  
+  # Summary Table 
+  
+  cat("\n\n")
+}
 ```
 
