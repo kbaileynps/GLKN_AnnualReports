@@ -9,9 +9,11 @@
 library(readr) # tidyverse data import
 library(dplyr) # data wrangling
 library(ggplot2) # plotting
-library(knitr) # for kable
-library(kableExtra) # custom kable features
+# library(knitr) # for kable
+# library(kableExtra) # custom kable features
 library(leaflet) # for mapping
+library(gt) # for table
+library(tidyr) # for pivoting
 
 # Start of Source Code ----
 ## Loading data ----
@@ -104,32 +106,46 @@ prep_table <- function(df, park_code, type){
   # filtering based on type
   parameters <- if(identical(type, "river")){
     df |> 
-      dplyr::filter(CharacteristicName %in% river_param) |> 
+      dplyr::filter(CharacteristicName %in% river_param)|> 
+      filter(!is.na(value)) |> 
       summarise(med = median(value, na.rm = TRUE),
                 stan_dev = sd(value, na.rm = TRUE),
+                min_val = min(value, na.rm = TRUE),
+                max_val = max(value, na.rm = TRUE),
                 .by = c("CharacteristicName",
                         "period")) |> 
       select(CharacteristicName,
              med,
              stan_dev,
-             period) |> 
-      rename(Parameter = CharacteristicName,
-             Median = med,
-             SD = stan_dev)
+             min_val,
+             max_val,
+             period) |>  
+      pivot_wider(names_from = period,
+                  values_from = c(med, 
+                                  stan_dev,
+                                  min_val,
+                                  max_val))
   } else{
     df |> 
-      dplyr::filter(CharacteristicName %in% lake_param) |> 
+      dplyr::filter(CharacteristicName %in% lake_param)|> 
+      filter(!is.na(value)) |> 
       summarise(med = median(value, na.rm = TRUE),
                 stan_dev = sd(value, na.rm = TRUE),
+                min_val = min(value, na.rm = TRUE),
+                max_val = max(value, na.rm = TRUE),
                 .by = c("CharacteristicName",
                         "period")) |> 
       select(CharacteristicName,
              med,
              stan_dev,
-             period) |> 
-      rename(Parameter = CharacteristicName,
-             Median = med,
-             SD = stan_dev)
+             min_val,
+             max_val,
+             period) |>  
+      pivot_wider(names_from = period,
+                  values_from = c(med, 
+                                  stan_dev,
+                                  min_val,
+                                  max_val))
   }
 }
 
@@ -246,20 +262,29 @@ plot_boxplot <- function(df){
 }
 
 ### table 
-# create_table <- function(df){
-#   DT::datatable(exceedance_values,
-#                 extension = c("Buttons",
-#                               "KeyTable"),
-#                 options = list(dom = "Bfrtip",
-#                                autoWidth = F,
-#                                buttons = c("copy",
-#                                            "csv",
-#                                            "excel"),
-#                                keys = TRUE),
-#                 class = "stripe hover order-column cell-border compact",
-#                 rownames = FALSE,
-#                 filter = "top")
-# }
+create_table <- function(df){
+  df |> 
+    gt() |> 
+    tab_spanner(label = html("<strong>Historic</strong>"),
+                columns = c(min_val_Historic,
+                            med_Historic,
+                            max_val_Historic,
+                            stan_dev_Historic)) |> 
+    tab_spanner(label = html("<strong>Present</strong>"),
+                columns = c(min_val_Current,
+                            med_Current,
+                            max_val_Current,
+                            stan_dev_Current)) |> 
+    cols_label(CharacteristicName = html("<strong>Parameter</strong>"),
+               min_val_Historic = html("<strong>Minimum</strong>"),
+               med_Historic = html("<strong>Median</strong>"),
+               max_val_Historic = html("<strong>Maximum</strong>"),
+               stan_dev_Historic = html("<strong>SD</strong>"),
+               min_val_Current = html("<strong>Minimum</strong>"),
+               med_Current = html("<strong>Median</strong>"),
+               max_val_Current = html("<strong>Maximum</strong>"),
+               stan_dev_Current = html("<strong>SD</strong>"))
+}
 
 # ### timeseries
 # plot_timeseries <- function(df, park_type){

@@ -136,7 +136,14 @@ for(site in sites){
   
   print(bp)
   
-  # Summary Table 
+  # Summary Table ----
+  table_data <- prep_table(df = site_data,
+                           park_code = params$park,
+                           type = park_type)
+  
+  table <- create_table(table_data)
+  
+  print(table)
   
   cat("\n\n")
 }
