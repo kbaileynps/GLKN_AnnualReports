@@ -1,11 +1,15 @@
 ---
 title: "Water Quality Monitoring for `r params$park_full`: `r format(Sys.Date(), '%Y')` Data Report"
-author: "Alex Egan, Richard Damstra, Cyrus Hester, and David VenderMeulen"
-output: html_document
+author: "Alex Egan, Richard Damstra, Cyrus Hester, and David VanderMeulen"
+output: 
+  html_document:
+    css: www/styles.css
 
 params:
   park: "ISRO" # default
   park_full: "Isle Royale National Park" # default
+  # park: "SACN" # default
+  # park_full: "St. Croix National Scenic Riverway" # default
 ---
 
 ```{r setup, include=FALSE}
@@ -41,7 +45,7 @@ if(type == "lake"){
 
 ## Overview {.tabset}
 
-In assistance with `r params$park` staff, the Great Lakes Inventory and Monitoring Network (GLKN) monitored water quality on the `r paste(sites, collapse = ", ")` `r park_type[params$park]` at `r params$park` for `r format(Sys.Date(), "%Y")`. This report contains figures and tables where `r format(Sys.Date(), "%Y")` data is compared to data from prior years for select parameters. The following water quality parameters are included in this report: 
+In assistance with `r params$park` staff, the Great Lakes Inventory and Monitoring Network (GLKN) monitored water quality on the `r paste(sites, collapse = ", ")` at `r params$park` for `r format(Sys.Date(), "%Y")`. This report contains figures and tables where `r format(Sys.Date(), "%Y")` data is compared to data from prior years for select parameters. The following water quality parameters are included in this report: 
 
 `r paste("-", selected_params, collapse = "\n")`
 
@@ -53,6 +57,67 @@ A complete list of parameters monitored at `r params$park` is shown below, and c
 map_data <- prep_map(df)
 
 plot_map(map_data)
+```
+
+### Site Summaries {.tabset}
+
+```{r site-tabs, results='asis', fig.width=14, fig.height=7, out.width='100%'}
+for(site in sites){
+  
+  # Create tab for site
+  cat("#### ", site, "\n\n")
+  
+  # subsetting site data 
+  site_data <- df |> 
+    dplyr::filter(MonitoringLocationName == site)
+  
+  # Boxplots ----
+  boxplot_data <- prep_boxplot(df = site_data,
+                               park_code = params$park,
+                               type = park_type)
+  
+  bp <- plot_boxplot(df = boxplot_data)
+  
+  print(bp)
+  
+  cat("<br><br>")
+  
+  cat("Boxplot showing current year data compared to all data collected at the site. \n\n")
+  
+  cat("<br><br>")
+  
+  # Summary Table ----
+  table_data <- prep_table(df = site_data,
+                           park_code = params$park,
+                           type = park_type)
+  
+  table <- create_table(table_data)
+  
+  cat("Table showing summary data for current year. \n\n")
+  
+  print(table)
+  
+  cat("<br><br>")
+
+  # Depth Profile
+  profile_data <- prep_profiles(df = site_data,
+                                park_code = params$park,
+                                type = park_type)
+  
+  # run if lake park, skip if not
+  if(!is.null(profile_data)){
+    
+  depth_profiles <- plot_depthprofile(current = profile_data$current,
+                                      historic = profile_data$historic)
+  
+  print(depth_profiles)
+  
+  cat("<br><br>")
+  
+  cat("Depth profiles plots for dissolved oxygen and water temperature. \n\n")
+  }
+  cat("\n\n")
+}
 ```
 
 ### Methods
@@ -114,38 +179,3 @@ The analytical laboratories the samples are sent to also have their own QA/QC pr
 As part of our annual data submission process, NPS Water Resources Division staff check our data to ensure it is formatted properly, does not contain grammatical errors, and compares it against prior submissions to document any edits to historical data.  
 
 This report adds an additional step to GLKN’s overall QAQC process as it helps facilitate internal review and analysis.  One important QAQC item to note for this report: Values reported by analytical laboratories that fall under the category of “< lower quantification limit” (also referred to as “below reporting limit” or “below method reporting limit”) are included as data points in the figures. We are confident that these values are close approximations to actual values. However, they should be treated with caution, particularly when doing rigorous statistical analyses. Values reported as “not detected” or “< detection limit” by laboratories are not included as data points on figures in this report but the total number of data points meeting that condition is shown above the figures. 
-
-### Site Summaries {.tabset}
-
-```{r site-tabs, results='asis'}
-for(site in sites){
-  
-  # Create tab for site
-  cat("#### ", site, "\n\n")
-  
-  # subsetting site data 
-  site_data <- df |> 
-    dplyr::filter(MonitoringLocationName == site)
-  
-  # Boxplots ----
-  boxplot_data <- prep_boxplot(df = site_data,
-                               park_code = params$park,
-                               type = park_type)
-  
-  bp <- plot_boxplot(df = boxplot_data)
-  
-  print(bp)
-  
-  # Summary Table ----
-  table_data <- prep_table(df = site_data,
-                           park_code = params$park,
-                           type = park_type)
-  
-  table <- create_table(table_data)
-  
-  print(table)
-  
-  cat("\n\n")
-}
-```
-

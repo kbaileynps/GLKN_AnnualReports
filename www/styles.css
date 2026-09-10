@@ -1,0 +1,85 @@
+/* Water Quality Annual Report stylesheer */
+
+body {
+  font-family: "FrutigerLTStd-Black","Arial",Arial,sans-serif;
+  font-size: 14px;
+  color: black;
+  margin: 0 auto;
+  /*width:1200px;*/
+  position: relative;
+}
+
+/* Header 1 */
+h1 {
+  font-family: "FrutigerLTStd-Black","Arial",Arial,sans-serif;
+  font-size: 22px;
+  color: black;
+  padding: 10px 0;
+  /*margin: 20px 0;*/
+}
+
+/* Header # */
+h2 {
+  font-family: "FrutigerLTStd-Black","Arial",Arial,sans-serif;
+  font-size: 22px;
+  color: black;
+  padding: 10px 0;
+  /*margin: 20px 0;*/
+}
+
+/* Paragraph */
+p {
+  font-family: "FrutigerLTStd-Black","Arial",Arial,sans-serif;
+  font-size: 14px;
+}
+
+/* Tabset pills */
+.nav>li>a {
+    /* position: relative;*/
+    display: inline-block;
+    margin:0 auto;
+    color: #778A77;
+    font-family: "FrutigerLTStd-Light",FrutigerLTStd-Light, sans-serif;
+    font-size: 16px;
+    text-indent:0;
+
+
+}
+.nav-pills>li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus {
+    color: #ffffff;
+    background-color: #778A77;
+    /*padding: 10px 15px;*/
+    margin:0 auto;
+
+}
+
+/* Link color */
+a {
+  color: #979154;
+  text-decoration: none; /* Optional: remove underline */
+}
+
+/* Table */
+/* Separate borders */
+.gt_table { 
+  border-collapse: separate; 
+  border-spacing: 0; 
+}
+
+/* header lines */
+.gt_table thead th {
+    border-bottom: 1px solid black;
+    padding: 8px;
+    text-align: center;
+}
+
+/* Style table body cells */
+.gt_table tbody td {
+  /*padding: 8px;*/
+  text-align: center;
+}
+
+/* Optional: ensure tables take full width of their container */
+table {
+  width: 100%;
+}
